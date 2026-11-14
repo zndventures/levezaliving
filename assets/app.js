@@ -84,25 +84,26 @@
   /* ---------------- registration ---------------- */
   function initSignup() {
     var form = $('#signup'), err = $('.err', form), btn = $('button[type=submit]', form);
-    $$('[data-role]').forEach(function (a) {
-      a.addEventListener('click', function () {
-        var r = form.querySelector('input[name=role][value=' + a.getAttribute('data-role') + ']'); if (r) r.checked = true;
-      });
+    /* any link or button with data-role switches the form between buyer and investor */
+    document.addEventListener('click', function (ev) {
+      var a = ev.target && ev.target.closest ? ev.target.closest('[data-role]') : null; if (!a) return;
+      form.role.value = a.getAttribute('data-role') === 'investor' ? 'investor' : 'buyer';
+      $('#register').classList.toggle('inv', form.role.value === 'investor');
     });
     form.addEventListener('submit', function (ev) {
       ev.preventDefault(); err.hidden = true;
       var d = { name: form.name.value.trim(), email: form.email.value.trim().toLowerCase(), role: form.role.value,
-        country: form.country.value.trim(), message: form.message.value.trim() };
+        country: '', message: form.role.value === 'investor' ? form.message.value.trim() : '' };
       if (!d.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) || !form.consent.checked) { err.textContent = t('f.err.required'); err.hidden = false; return; }
       function done() { state.sent = { role: d.role, email: d.email }; form.hidden = true; $('#signup-sent').hidden = false; applyLang(); }
       if (form.website.value) { done(); return; }               /* honeypot: bots fill this in */
       if (!api) { err.textContent = t('f.err.config'); err.hidden = false; return; }
-      btn.disabled = true; btn.innerHTML = t('f.sending');
+      var label = btn.innerHTML; btn.disabled = true; btn.innerHTML = t('f.sending');
       api.signUp(d).then(function (r) {
-        btn.disabled = false; btn.innerHTML = t('f.submit');
+        btn.disabled = false; btn.innerHTML = label;
         if (r && r.error) { err.textContent = t('f.err.generic'); err.hidden = false; return; }
         done();
-      }, function () { btn.disabled = false; btn.innerHTML = t('f.submit'); err.textContent = t('f.err.generic'); err.hidden = false; });
+      }, function () { btn.disabled = false; btn.innerHTML = label; err.textContent = t('f.err.generic'); err.hidden = false; });
     });
   }
 
