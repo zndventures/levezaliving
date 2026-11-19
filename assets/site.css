@@ -345,12 +345,10 @@ section{padding:9vh 0}
 /* ---------- plan teaser beside the "after you register" card ---------- */
 .peek{display:grid; grid-template-columns:1fr 1fr; gap:clamp(18px,3vw,40px); align-items:stretch; margin-top:8vh}
 .peek .doorcard{margin:0; max-width:none; justify-content:center}
-.peekfig{position:relative; margin:0; border:1px solid var(--line); border-radius:4px; overflow:hidden; background:#F6F2E8; max-height:470px;
-  box-shadow:0 24px 50px -34px rgba(42,38,32,.3)}
-.peekfig img{display:block; width:100%; height:100%; object-fit:cover; object-position:center 62%}
-.peekfig::after{content:""; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(180deg, #F6F2E8 0%, rgba(246,242,232,0) 20%, rgba(246,242,232,0) 68%, #F6F2E8 96%)}
-.peekfig figcaption{position:absolute; left:0; right:0; bottom:14px; z-index:2; text-align:center; margin:0}
+.peekfig{margin:0; border:1px solid var(--line); border-radius:4px; overflow:hidden; background:var(--paper); max-height:480px;
+  display:flex; flex-direction:column; box-shadow:0 24px 50px -34px rgba(42,38,32,.3)}
+.peekfig img{display:block; width:100%; height:auto; flex:1 1 auto; min-height:0; object-fit:cover; object-position:center}
+.peekfig figcaption{flex:none; margin:0; padding:12px 14px 13px; text-align:center; background:var(--card); border-top:1px solid var(--line)}
 /* ---------- next step in the closed part ---------- */
 .nextform{max-width:560px; margin-top:24px}
 .nextform fieldset{display:grid; gap:2px}
@@ -372,4 +370,4 @@ section{padding:9vh 0}
 .stat-cols div div span:first-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .adm-section{margin-top:9vh}
 #lz-captcha{position:fixed; right:14px; bottom:14px; z-index:70}
-@media (max-width:860px){ .peek{grid-template-columns:1fr} .peekfig{max-height:360px} .stat-tiles{grid-template-columns:repeat(3,1fr)} .stat-cols{grid-template-columns:1fr 1fr} }
+@media (max-width:860px){ .peek{grid-template-columns:1fr} .peekfig{max-height:none} .stat-tiles{grid-template-columns:repeat(3,1fr)} .stat-cols{grid-template-columns:1fr 1fr} }
