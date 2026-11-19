@@ -334,3 +334,10 @@ section{padding:9vh 0}
 @media (max-width:980px){ .factgrid{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:860px){ #idea .split, #house .split{align-items:start} .hero{min-height:92vh} }
 @media (max-width:560px){ .factgrid{grid-template-columns:1fr 1fr} .hero .lead{font-size:15.5px} .ficha.dist td{white-space:normal} }
+
+/* Cormorant Garamond sets old-style figures by default; use lining figures where numbers are the message */
+.factgrid dt{font-variant-numeric:lining-nums; font-size:clamp(28px,2.8vw,36px)}
+.ficha td.big, .way .ex, .tbl td, .ficha.dist td{font-variant-numeric:lining-nums}
+
+.adm button.del{border-color:var(--rosedeep); color:var(--roseink)}
+.adm button.danger{background:var(--roseink); border-color:var(--roseink); color:#fff}

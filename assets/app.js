@@ -55,6 +55,7 @@
       list: function () { return sb.from('profiles').select('*').order('created_at', { ascending: false }).then(function (r) { return r.data || []; }); },
       setInvestor: function (id, st) { return sb.rpc('admin_set_investor_status', { target: id, new_status: st }).then(function (r) { return { error: r.error }; }); },
       setBlocked: function (id, b) { return sb.rpc('admin_set_blocked', { target: id, is_blocked: b }).then(function (r) { return { error: r.error }; }); },
+      remove: function (id) { return sb.rpc('admin_delete_user', { target: id }).then(function (r) { return { error: r.error }; }); },
       logout: function () { return sb.auth.signOut(); }
     };
   }
@@ -206,7 +207,7 @@
           var pend = rows.filter(function (r) { return r.investor_status === 'pending'; }).length;
           var d = function (x) { return x ? new Date(x).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; };
           var h = '<h2 class="display">Inschrijvingen</h2><p class="body">' + rows.length + ' inschrijvingen · <b>' + pend + '</b> investeerder(s) wachten op goedkeuring. ' +
-            'Na goedkeuren kun je met "Stuur link" een inlogmail sturen. <a href="#acesso">Naar de besloten kant</a></p>' +
+            'Na goedkeuren kun je met "Stuur link" een inlogmail sturen. "Verwijderen" wist het account en alle gegevens van die persoon definitief. <a href="#acesso">Naar de besloten kant</a></p>' +
             '<div class="tblwrap"><table class="adm"><tr><th>Naam</th><th>Type</th><th>Investeerder</th><th>Land · taal</th><th>Ingeschreven</th><th>Bevestigd</th><th>Bericht</th><th>Actie</th></tr>';
           rows.forEach(function (r) {
             h += '<tr data-id="' + esc(r.id) + '" data-email="' + esc(r.email) + '"><td><b>' + esc(r.full_name || '—') + '</b><br>' + esc(r.email) + (r.blocked ? '<br><span class="pill pending">geblokkeerd</span>' : '') + '</td>' +
@@ -216,13 +217,20 @@
               '<td><div class="m">' + esc(r.message || '') + '</div></td><td>' +
               (r.investor_status !== 'approved' && r.role === 'investor' ? '<button class="go" data-act="approved">Goedkeuren</button>' : '') +
               (r.investor_status === 'pending' || r.investor_status === 'approved' ? '<button data-act="declined">' + (r.investor_status === 'approved' ? 'Intrekken' : 'Afwijzen') + '</button>' : '') +
-              '<button data-act="link">Stuur link</button><button data-act="' + (r.blocked ? 'unblock' : 'block') + '">' + (r.blocked ? 'Deblokkeren' : 'Blokkeren') + '</button></td></tr>';
+              '<button data-act="link">Stuur link</button><button data-act="' + (r.blocked ? 'unblock' : 'block') + '">' + (r.blocked ? 'Deblokkeren' : 'Blokkeren') + '</button>' +
+              (r.id !== p.id && !r.is_admin ? '<button class="del" data-act="delete">Verwijderen</button>' : '') + '</td></tr>';
           });
           box.innerHTML = h + '</table></div>';
           $$('button[data-act]', box).forEach(function (b) {
             b.addEventListener('click', function () {
-              var tr = b.closest('tr'), id = tr.getAttribute('data-id'), act = b.getAttribute('data-act'); b.disabled = true;
-              var pr = act === 'link' ? api.login(tr.getAttribute('data-email')) : act === 'block' ? api.setBlocked(id, true) : act === 'unblock' ? api.setBlocked(id, false) : api.setInvestor(id, act);
+              var tr = b.closest('tr'), id = tr.getAttribute('data-id'), act = b.getAttribute('data-act');
+              if (act === 'delete' && !b.getAttribute('data-armed')) {          /* first click arms the button, second click deletes */
+                b.setAttribute('data-armed', '1'); b.classList.add('danger'); b.textContent = 'Zeker weten? Definitief verwijderen';
+                setTimeout(function () { if (b.isConnected && !b.disabled) { b.removeAttribute('data-armed'); b.classList.remove('danger'); b.textContent = 'Verwijderen'; } }, 6000);
+                return;
+              }
+              b.disabled = true;
+              var pr = act === 'delete' ? api.remove(id) : act === 'link' ? api.login(tr.getAttribute('data-email')) : act === 'block' ? api.setBlocked(id, true) : act === 'unblock' ? api.setBlocked(id, false) : api.setInvestor(id, act);
               pr.then(function (r) {
                 if (r && r.error) { b.disabled = false; b.textContent = 'Mislukt'; return; }
                 if (act === 'link') { b.textContent = 'Verstuurd'; return; }
